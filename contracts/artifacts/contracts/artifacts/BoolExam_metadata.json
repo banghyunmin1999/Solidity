@@ -1,0 +1,59 @@
+{
+	"compiler": {
+		"version": "0.8.9+commit.e5eed63a"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"name": "getBoolean",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/6_dataTypeInt.sol": "BoolExam"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/6_dataTypeInt.sol": {
+			"keccak256": "0x2113fef8de1e461b773080bdb4e30970a6f313d97ccab553b0d3c086bb6b611f",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://c92dbc4751e022079593090415b0e806e82b51241dda2cc5928a7e674af49c67",
+				"dweb:/ipfs/QmWZPL4PVSpafkdLs8BS1nqwjgJRwT28PDPQxBZRo4BXoB"
+			]
+		}
+	},
+	"version": 1
+}

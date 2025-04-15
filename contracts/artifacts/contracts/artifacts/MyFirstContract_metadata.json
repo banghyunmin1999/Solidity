@@ -1,0 +1,78 @@
+{
+	"compiler": {
+		"version": "0.8.9+commit.e5eed63a"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"name": "sayHello",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "pure",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					}
+				],
+				"name": "sayHello2",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "pure",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/4_hellowWorld.sol": "MyFirstContract"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/4_hellowWorld.sol": {
+			"keccak256": "0x5fbdd922e7888625aa40bf0e69a3fe53e4fa4e2340b8d6196a94e0352bded8b7",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0cfe5efadbbcd27f88e4b7430246e319a100c36e2afac1c684200a215c5b234e",
+				"dweb:/ipfs/Qmcg7EkwsSwyawzKVUq4yhtuhPwS5uDPdK4XmTS4CKmB2z"
+			]
+		}
+	},
+	"version": 1
+}
