@@ -321,8 +321,8 @@ var auctionContract =  new web3.eth.Contract(
 ]
 );
 
-auctionContract.options.address = '0x0465256d4A09f0F00b69Cf8221Dd1c35f1557017';
-var userWalletAddress = '0x2cC8c268ea49A8ccEcf5515Faaf338B8BA9D9D79';
+auctionContract.options.address = '0x2Bfd7fdA68229d6a0c853696024b820608807812';
+var userWalletAddress = '0x12e9f0B16e645b30EeaA3b6ffF594Cc41708798b';
 function bid() {
   var mybid = document.getElementById('value').value;
 
