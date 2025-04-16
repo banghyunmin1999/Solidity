@@ -7,7 +7,9 @@ contract Auction {
     uint256 public auction_end;
     uint256 public highestBid;
     address public highestBidder;
-
+    // 한것 isWithdraw = false 소유주가 출금 안한 상태 , true 출금한 상태
+    bool internal  isWithdraw = false;
+  
     enum auction_state {
         CANCELLED, STARTED
     }
@@ -27,10 +29,28 @@ contract Auction {
         require(block.timestamp <= auction_end, "Auction has ended");
         _;
     }
+    // 한것
+    // 경매가 끝났는지 확인하는 modifier
+    modifier end_auction() {
+        require(block.timestamp > auction_end, "Auction id ongoing");
+        _;
+    }
+    // 한것
+    // 경매소유자가 출금을 했는지 확인하는 modifier 
+    modifier withdraw_owner() {
+        require(isWithdraw, "You have already withdrawn");
+        _;
+    }
 
     // 경매 소유자만 호출할 수 있는 modifier
     modifier only_owner() {
         require(msg.sender == auction_owner, "Only auction owner can call this");
+        _;
+    }
+    // 한것
+    // 최고 금액 경매 참여자를 판단할수 있는 modifier
+    modifier isHighestBidder() {
+        require(msg.sender != highestBidder , "is the highest bidder");
         _;
     }
 
@@ -84,17 +104,48 @@ contract MyAuction is Auction {
         emit CanceledEvent(2, block.timestamp);
     }
 
+    // 한 일 경매 소유자는 경매가 끝난 이후에 스마트 컨트랙트 안의 금액중 최고 입찰자의 금액을 1회만 가져갈수 있음
     // 경매 소유자가 남은 자금을 회수하는 함수
-    function withdrawRemainingFunds() external only_owner {
+    function withdrawRemainingFunds() external only_owner end_auction withdraw_owner{
+        uint amount = bids[highestBidder];
+        isWithdraw = true;// 더는 출금 못하게 막음
         uint balance = address(this).balance;
         require(balance > 0, "No funds left in the contract");
 
-        (bool success, ) = payable(auction_owner).call{value: balance}("");
+        (bool success, ) = payable(auction_owner).call{value: amount}("");
         require(success, "Transfer failed");
     }
 
+    // 원본
+    //     // 경매 소유자가 남은 자금을 회수하는 함수
+    // function withdrawRemainingFunds() external only_owner {
+    //     uint balance = address(this).balance;
+    //     require(balance > 0, "No funds left in the contract");
+
+    //     (bool success, ) = payable(auction_owner).call{value: balance}("");
+    //     require(success, "Transfer failed");
+    // }
+    // 원본
+    // // 출금 함수 (입찰자들이 자금을 출금) 
+    // function withdraw() public override returns (bool) {
+    //     uint amount = bids[msg.sender];
+    //     require(amount > 0, "No funds to withdraw");
+
+    //     bids[msg.sender] = 0;
+
+    //     // 안전한 전송 방법 사용
+    //     // (bool success, ) = payable(msg.sender).call{value: amount}("");
+    //     (bool success, ) = payable(msg.sender).call{value: amount, gas: 5000}(""); 
+
+    //     require(success, "Transfer failed");
+
+    //     emit WithdrawalEvent(msg.sender, amount);
+    //     return true;
+    // }
+
+    // isHighestBidder modifierf를 추가 해서 최고 입찰자는 출금을 못하게 함
     // 출금 함수 (입찰자들이 자금을 출금)
-    function withdraw() public override returns (bool) {
+    function withdraw() public override isHighestBidder returns (bool)  {
         uint amount = bids[msg.sender];
         require(amount > 0, "No funds to withdraw");
 
@@ -121,8 +172,5 @@ contract MyAuction is Auction {
         emit StateUpdated(newState); // 상태 업데이트 이벤트 발생
     }
 
-    function seeTimeLimit(uint256 auction_start, uint256 auction_end) external only_owner {
-        start = auction_start;
-        end = auction_end;
-    }
+
 }
