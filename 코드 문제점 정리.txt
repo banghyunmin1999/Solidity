@@ -35,4 +35,4 @@
 → 출금 못하는경우 alert로 최고 입찰자여서 못한다고 표시
 
 8. 소유주가 경매를 중단해도 입찰이 가능함
-→ an_ongoing_auction modifier부분에 경매가 중단됬는지 확인하는 부분 추가가
+→ an_ongoing_auction modifier부분에 경매가 중단됬는지 확인하는 부분 추가
