@@ -107,7 +107,7 @@ contract MyAuction is Auction {
         emit CanceledEvent(2, block.timestamp);
     }
 
-    // 한 일 경매 소유자는 경매가 끝난 이후에 스마트 컨트랙트 안의 금액중 최고 입찰자의 금액을 1회만 가져갈수 있음
+    // 한것 경매 소유자는 경매가 끝난 이후에 스마트 컨트랙트 안의 금액중 최고 입찰자의 금액을 1회만 가져갈수 있음
     // 경매 소유자가 남은 자금을 회수하는 함수
     function withdrawRemainingFunds() external only_owner end_auction withdraw_owner{
         uint amount = bids[highestBidder];

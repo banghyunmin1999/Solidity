@@ -342,7 +342,7 @@ var auctionContract =  new web3.eth.Contract(
 auctionContract.options.address = '0xAB5EA3175ef6f5e081afACcD2e070a1918809b66';
 var userWalletAddress = '0x497438C06ED68c0C4b1148d295283b078a33263b';
 
-// 한것 .catch() 로 낮은 가격으로 입찰시 오류를 발생시켜 입찰을 막음음
+// 한것 .catch() 로 낮은 가격으로 입찰시 오류를 발생시켜 입찰을 막음
 function bid() {
   
   var mybid = document.getElementById('value').value;
