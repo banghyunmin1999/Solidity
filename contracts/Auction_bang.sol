@@ -7,8 +7,8 @@ contract Auction {
     uint256 public auction_end;
     uint256 public highestBid;
     address public highestBidder;
-    // [NEW] isWithdraw = false 소유주가 출금 안한 상태 , true 출금한 상태
-    bool internal  isWithdraw = false;
+    // [NEW] isWithdraw = true 소유주가 출금 안한 상태 , false 출금한 상태
+    bool internal  isWithdraw = true;
   
     enum auction_state {
         CANCELLED, STARTED
@@ -23,6 +23,7 @@ contract Auction {
     address[] bidders;
     mapping(address => uint) public bids;
     auction_state public STATE;
+    
     // [NEW] 소유주가 경매를 중단했는지 확인하는 부분 추가
     // 경매가 진행 중인지 확인하는 modifier
     modifier an_ongoing_auction() {
@@ -31,9 +32,9 @@ contract Auction {
         _;
     }
     // [NEW]
-    // 경매가 끝났는지 확인하는 modifier
+    // 경매가 끝났는지 확인하는 modifier ( 시간이 끝났거나 경매 소유자가 경매를 중단했거나)
     modifier end_auction() {
-        require(block.timestamp > auction_end, "Auction id ongoing");
+        require(block.timestamp > auction_end || STATE == auction_state.CANCELLED, "Auction id ongoing");
         _;
     }
     // [NEW]
@@ -111,7 +112,7 @@ contract MyAuction is Auction {
     // 경매 소유자가 남은 자금을 회수하는 함수
     function withdrawRemainingFunds() external only_owner end_auction withdraw_owner{
         uint amount = bids[highestBidder];
-        isWithdraw = true;// [NEW]더는 출금 못하게 막음
+        isWithdraw = false;// [NEW]더는 출금 못하게 막음
         uint balance = address(this).balance;
         require(balance > 0, "No funds left in the contract");
 
