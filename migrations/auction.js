@@ -37,7 +37,25 @@ web3.eth.getAccounts().then(function(acc){
       console.log(bidder);
    
   }); 
+
+  
 }); // end of web3.eth.getAccounts()
+
+// [NEW] 유닉스 타임스탬프를 사람이 읽을 수 있게 초 단위를 밀리초로 변환
+function formatTimestamp(unixTimestamp) {
+  const date = new Date(unixTimestamp * 1000);
+  return date.toLocaleString(); //변환된 날짜 객체를 입찰자의 로컬 시스템 시간으로 변환환
+}
+// [NEW]경매의 시작 시간과 종료 시간을 가져오는 함수
+async function loadAuctionTimes() {
+  const startTime = await auctionContract.methods.auction_start().call();
+  const endTime = await auctionContract.methods.auction_end().call();
+
+  document.getElementById("start_time").innerHTML = formatTimestamp(startTime);
+  document.getElementById("end_time").innerHTML = formatTimestamp(endTime);
+}
+// [NEW]HTML 문서가 모두 로드된 후에 경매 시간을 불러오는 함수를 실행
+window.addEventListener("DOMContentLoaded", loadAuctionTimes);
 
 var auctionContract =  new web3.eth.Contract(
 [
@@ -321,19 +339,26 @@ var auctionContract =  new web3.eth.Contract(
 ]
 );
 
-auctionContract.options.address = '0x0465256d4A09f0F00b69Cf8221Dd1c35f1557017';
-var userWalletAddress = '0x2cC8c268ea49A8ccEcf5515Faaf338B8BA9D9D79';
+auctionContract.options.address = '0xAB5EA3175ef6f5e081afACcD2e070a1918809b66';
+var userWalletAddress = '0x497438C06ED68c0C4b1148d295283b078a33263b';
+
+// [NEW] .catch() 로 낮은 가격으로 입찰시 오류를 발생시켜 입찰을 막음
 function bid() {
+  
   var mybid = document.getElementById('value').value;
 
-  auctionContract.methods.bid().send({from: userWalletAddress, value: web3.utils.toWei(mybid, "ether"), gas: 200000}).then((result)=>{
-    console.log(result)
-
-    document.getElementById("biding_status").innerHTML="Successfull bid, transaction ID : "+ result.transactionHash; 
-
-    });
-  
-} 
+  auctionContract.methods.bid().send({from: userWalletAddress, value: web3.utils.toWei(mybid, "ether"), gas: 200000})
+  .then((result)=>{
+  console.log(result)
+  document.getElementById("biding_status").innerHTML="Successfull bid, transaction ID : "+ result.transactionHash; 
+  })
+  .catch((error) => {
+    console.error(error);
+    alert("현재 경매중이 아니거나 , 입찰 금액이 현재 최고 금액보다 적습니다.");  
+    document.getElementById("withdraw_status").innerHTML = "Withdraw failed: " + error.message;
+  });
+}
+ 
 	
 
 	
@@ -368,18 +393,29 @@ function withdraw() {
         document.getElementById("withdraw_status").innerHTML = "Withdraw successful, transaction ID: " + result.transactionHash;
     })
     .catch((error) => {
+        // [NEW] 최고 입찰자는 출금 못한다고 알려주기
+        alert("최고 입찰자는 출금하실수 없습니다")
         console.error(error);
         document.getElementById("withdraw_status").innerHTML = "Withdraw failed: " + error.message;
     });
 }
-
-
-
 function Destruct_auction(){
   
 
 }
-  
+function withdrawRemainingFunds() {
+  auctionContract.methods.withdrawRemainingFunds().send({ from: userWalletAddress, gas: 200000 })
+  .then((result) => {
+      console.log(result);
+      document.getElementById("withdrawRemainingFundsText").innerHTML = "최고 입찰금액을 출금했습니다: " + result.transactionHash;
+  })
+  .catch((error) => {
+      // [NEW] 경매 도중에는 불가하다고 알림
+      alert("경매 도중에는 불가능합니다")
+      console.error(error);
+      document.getElementById("withdrawRemainingFundsText").innerHTML = "Withdraw failed: " + error.message;
+  });
+}  
 
 
 auctionContract.events.BidEvent(/*{highestBidder:"A",highestBid:"888"},*/function(error, event){ 
@@ -423,4 +459,3 @@ auctionContract.events.WithdrawalEvent({}, function(error, event) {
         console.log("Auction state updated: ", event.returnValues.newState);
     }
 })
-
