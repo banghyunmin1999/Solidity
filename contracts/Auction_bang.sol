@@ -23,11 +23,10 @@ contract Auction {
     address[] bidders;
     mapping(address => uint) public bids;
     auction_state public STATE;
-    // 한것 소유주가 경매를 중단했는지 확인하는 부분 추가
+
     // 경매가 진행 중인지 확인하는 modifier
     modifier an_ongoing_auction() {
         require(block.timestamp <= auction_end, "Auction has ended");
-        require(STATE == auction_state.STARTED, "Auction was cancelled");
         _;
     }
     // 한것
@@ -65,7 +64,6 @@ contract Auction {
     event WithdrawalEvent(address withdrawer, uint256 amount);
     event CanceledEvent(uint message, uint256 time);
     event StateUpdated(auction_state newState); // 상태 업데이트 이벤트 추가
-    
 }
 
 contract MyAuction is Auction {
@@ -79,18 +77,17 @@ contract MyAuction is Auction {
         Mycar.Brand = _brand;
         Mycar.Rnumber = _Rnumber;
     }
-    // 한것 최고입찰금액보다 작을경우 false 반환하는것을 넣어서 클라이언트에서 낮은가격으로 입찰했을때 죽는것을 방지
+
     // 부모 컨트랙트의 bid 함수 재정의 (override)
     function bid() public payable override an_ongoing_auction returns (bool) {
-        require (bids[msg.sender] + msg.value > highestBid, "Bid is too low");  
+        require(bids[msg.sender] + msg.value > highestBid, "You can't bid, make a higher bid");
         highestBidder = msg.sender;
-        // 최고 입찰금액을 msg.value → bids[msg.sender] + msg.value로 수정해서 낮은금액으로 입찰하던것을 막음
-        highestBid = bids[msg.sender] + msg.value;
+        highestBid = msg.value;
         bidders.push(msg.sender);
         bids[msg.sender] = bids[msg.sender] + msg.value;
         emit BidEvent(highestBidder, highestBid);
+
         return true;
-        
     }
 
     // 부모 컨트랙트의 cancel_auction 함수 재정의 (override)
@@ -107,7 +104,7 @@ contract MyAuction is Auction {
         emit CanceledEvent(2, block.timestamp);
     }
 
-    // 한것 경매 소유자는 경매가 끝난 이후에 스마트 컨트랙트 안의 금액중 최고 입찰자의 금액을 1회만 가져갈수 있음
+    // 한 일 경매 소유자는 경매가 끝난 이후에 스마트 컨트랙트 안의 금액중 최고 입찰자의 금액을 1회만 가져갈수 있음
     // 경매 소유자가 남은 자금을 회수하는 함수
     function withdrawRemainingFunds() external only_owner end_auction withdraw_owner{
         uint amount = bids[highestBidder];
@@ -119,7 +116,32 @@ contract MyAuction is Auction {
         require(success, "Transfer failed");
     }
 
+    // 원본
+    //     // 경매 소유자가 남은 자금을 회수하는 함수
+    // function withdrawRemainingFunds() external only_owner {
+    //     uint balance = address(this).balance;
+    //     require(balance > 0, "No funds left in the contract");
 
+    //     (bool success, ) = payable(auction_owner).call{value: balance}("");
+    //     require(success, "Transfer failed");
+    // }
+    // 원본
+    // // 출금 함수 (입찰자들이 자금을 출금) 
+    // function withdraw() public override returns (bool) {
+    //     uint amount = bids[msg.sender];
+    //     require(amount > 0, "No funds to withdraw");
+
+    //     bids[msg.sender] = 0;
+
+    //     // 안전한 전송 방법 사용
+    //     // (bool success, ) = payable(msg.sender).call{value: amount}("");
+    //     (bool success, ) = payable(msg.sender).call{value: amount, gas: 5000}(""); 
+
+    //     require(success, "Transfer failed");
+
+    //     emit WithdrawalEvent(msg.sender, amount);
+    //     return true;
+    // }
 
     // isHighestBidder modifierf를 추가 해서 최고 입찰자는 출금을 못하게 함
     // 출금 함수 (입찰자들이 자금을 출금)
@@ -149,7 +171,6 @@ contract MyAuction is Auction {
         STATE = newState;
         emit StateUpdated(newState); // 상태 업데이트 이벤트 발생
     }
-
 
 
 }
