@@ -60,6 +60,7 @@ contract Auction {
     function bid() public payable virtual returns (bool) {}
     function withdraw() public virtual returns (bool) {}
     function cancel_auction() external virtual returns (bool) {}
+    function withdrawRemainingFunds() external virtual {}
 
     // 이벤트 선언
     event BidEvent(address indexed highestBidder, uint256 highestBid);
@@ -80,11 +81,12 @@ contract MyAuction is Auction {
         Mycar.Brand = _brand;
         Mycar.Rnumber = _Rnumber;
     }
-    // [NEW] 최고입찰금액보다 작을경우 false 반환하는것을 넣어서 클라이언트에서 낮은가격으로 입찰했을때 죽는것을 방지
+    // [NEW] 최고입찰금액보다 작을경우 트랜젝션을 롤백해 클라이언트에서 낮은가격으로 입찰했을때 오류발생 방지
     // 부모 컨트랙트의 bid 함수 재정의 (override)
     function bid() public payable override an_ongoing_auction returns (bool) {
         require (bids[msg.sender] + msg.value > highestBid, "Bid is too low");  
         highestBidder = msg.sender;
+
         // [NEW]최고 입찰금액을 msg.value → bids[msg.sender] + msg.value로 수정해서 낮은금액으로 입찰하던것을 막음
         highestBid = bids[msg.sender] + msg.value;
         bidders.push(msg.sender);
@@ -108,9 +110,9 @@ contract MyAuction is Auction {
         emit CanceledEvent(2, block.timestamp);
     }
 
-    // [NEW] 경매 소유자는 경매가 끝난 이후에 스마트 컨트랙트 안의 금액중 최고 입찰자의 금액을 1회만 가져갈수 있음
+    // [NEW] 경매 소유자는 경매가 끝난 이후에 스마트 컨트랙트 안의 금액중 최고 입찰자의 금액을 1회만 출금가능
     // 경매 소유자가 남은 자금을 회수하는 함수
-    function withdrawRemainingFunds() external only_owner end_auction withdraw_owner{
+    function withdrawRemainingFunds() external override only_owner end_auction withdraw_owner{
         uint amount = bids[highestBidder];
         isWithdraw = false;// [NEW]더는 출금 못하게 막음
         uint balance = address(this).balance;
@@ -122,7 +124,7 @@ contract MyAuction is Auction {
 
 
 
-    // [NEW]isHighestBidder modifierf를 추가 해서 최고 입찰자는 출금을 못하게 함
+    // [NEW]isHighestBidder modifierf를 추가 해서 최고 입찰자는 출금불가
     // 출금 함수 (입찰자들이 자금을 출금)
     function withdraw() public override isHighestBidder returns (bool)  {
         uint amount = bids[msg.sender];
